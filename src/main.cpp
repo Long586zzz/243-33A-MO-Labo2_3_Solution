@@ -2,7 +2,7 @@
 // Date de création du programme: 10 septembre 2025
 // Date de la dernière modification: 19 septembre 2025
 // Nom du programmeur principal: Guillaume Beaulieu
-//
+// Nom du programmeur secondaire: Bao Long Nguyen
 // But du programme: solution de base pour le laboratoire 2-3
 // Le jeu Simon consiste à mémoriser une séquence de boutons aléatoires
 // affichée par l'ordinateur et à la reproduire en appuyant sur les
@@ -89,47 +89,68 @@ void afficheBoutons(int bouton, bool isFull, bool skipRefresh = false)
     case HAUT:
       if (isFull)
       {
-        matrix.fillCircle(27, 11, 2, matrix.Color333(7, 7, 7));
+        matrix.fillCircle(27, 11, 2, matrix.Color333(0, 7, 7));
       }
       else
       {
         matrix.fillCircle(27, 11, 2, matrix.Color333(0, 0, 0));
-        matrix.drawCircle(27, 11, 2, matrix.Color333(7, 7, 7));
+        matrix.drawCircle(27, 11, 2, matrix.Color333(0, 7, 7));
       }
       break;
     case BAS:
       if (isFull)
       {
-        matrix.fillCircle(27, 21, 2, matrix.Color333(7, 7, 7));
+        matrix.fillCircle(27, 21, 2, matrix.Color333(0, 7, 7));
       }
       else
       {
         matrix.fillCircle(27, 21, 2, matrix.Color333(0, 0, 0));
-        matrix.drawCircle(27, 21, 2, matrix.Color333(7, 7, 7));
+        matrix.drawCircle(27, 21, 2, matrix.Color333(0, 7, 7));
       }
       break;
     case GAUCHE:
       if (isFull)
       {
-        matrix.fillCircle(22, 16, 2, matrix.Color333(7, 7, 7));
+        matrix.fillCircle(22, 16, 2, matrix.Color333(0, 7, 7));
       }
       else
       {
         matrix.fillCircle(22, 16, 2, matrix.Color333(0, 0, 0));
-        matrix.drawCircle(22, 16, 2, matrix.Color333(7, 7, 7));
+        matrix.drawCircle(22, 16, 2, matrix.Color333(0, 7, 7));
       }
       break;
     case DROITE:
       if (isFull)
       {
-        matrix.fillCircle(32, 16, 2, matrix.Color333(7, 7, 7));
+        matrix.fillCircle(32, 16, 2, matrix.Color333(0, 7, 7));
       }
       else
       {
         matrix.fillCircle(32, 16, 2, matrix.Color333(0, 0, 0));
-        matrix.drawCircle(32, 16, 2, matrix.Color333(7, 7, 7));
+        matrix.drawCircle(32, 16, 2, matrix.Color333(0, 7, 7));
       }
       break;
+    case B:
+      if (isFull)
+      {
+        matrix.fillCircle(10, 16, 2, matrix.Color333(7, 0, 0));
+      }
+      else
+      {
+        matrix.fillCircle(10, 16, 2, matrix.Color333(0, 0, 0));
+        matrix.drawCircle(10, 16, 2, matrix.Color333(7, 0, 0));
+      }
+      break;
+    case C:
+      if (isFull)     
+      {
+        matrix.fillCircle(42, 16, 2, matrix.Color333(0, 7, 0));
+      }
+      else
+      {
+        matrix.fillCircle(42, 16, 2, matrix.Color333(0, 0, 0));
+        matrix.drawCircle(42, 16, 2, matrix.Color333(0, 7, 0));
+      }
     }
   }
 }
@@ -141,7 +162,28 @@ void lireBoutonsDebug()
   static bool old_btn_bas = 0;    // Variable pour l'ancienne valeur du bouton bas
   static bool old_btn_gauche = 0; // Variable pour l'ancienne valeur du bouton gauche
   static bool old_btn_droite = 0; // Variable pour l'ancienne valeur du bouton droit
-
+  static bool old_btn_b = 0;      // Variable pour l'ancienne valeur du bouton B
+  static bool old_btn_c = 0;      // Variable pour l'ancienne valeur du bouton C
+    if (!isBitSet(PINC, BTN_B) && old_btn_b == 1)
+  {
+    afficheBoutons(B, true);
+    old_btn_b = 0;
+  }
+  else if (isBitSet(PINC, BTN_B) && old_btn_b == 0)
+  {
+    afficheBoutons(B, false);
+    old_btn_b = 1;
+  }
+    if (!isBitSet(PINC, BTN_C) && old_btn_c == 1)
+  {
+    afficheBoutons(C, true);
+    old_btn_c = 0;
+  }
+  else if (isBitSet(PINC, BTN_C) && old_btn_c == 0)
+  {
+    afficheBoutons(C, false);
+    old_btn_c = 1;
+  }
   if (!isBitSet(PINC, BTN_HAUT) && old_btn_haut == 1)
   {
     afficheBoutons(HAUT, true);
@@ -216,7 +258,7 @@ void afficheSequenceOrdi()
 }
 
 // Fonction pour lire quel bouton a été appuyé par le joueur.
-// Retourne HAUT, BAS, GAUCHE, DROITE ou -1 si aucun bouton n'est appuyé.
+// Retourne HAUT, BAS, GAUCHE, DROITE, A, B, C ou -1 si aucun bouton n'est appuyé.
 // Ici on inverse ! car les boutons sont actifs à l'état bas (0V).
 int lireBouton()
 {
@@ -228,8 +270,14 @@ int lireBouton()
     return GAUCHE;
   if (!isBitSet(PINC, BTN_DROITE))
     return DROITE;
+  if (!isBitSet(PINC, BTN_B))
+    return B;
+  if (!isBitSet(PINC, BTN_C))
+    return C;
   return -1;
 }
+
+
 
 void lireSequenceJoueur()
 {
@@ -278,6 +326,8 @@ void etatDebut()
     afficheBoutons(BAS, false, true);
     afficheBoutons(GAUCHE, false, true);
     afficheBoutons(DROITE, false, true);
+    afficheBoutons(B, false, true);
+    afficheBoutons(C, false, true);
     etatDuJeu = JEU;
     Serial.println("Changement d'état: JEU");
 
@@ -297,6 +347,7 @@ void etatJeu()
   remplirSequenceOrdi();
   afficheSequenceOrdi();
   lireSequenceJoueur();
+  
   if (VerificationSequences())
   {
     Serial.println("Correct");
