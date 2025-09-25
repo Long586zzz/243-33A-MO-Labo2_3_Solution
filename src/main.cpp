@@ -270,14 +270,17 @@ int lireBouton()
     return GAUCHE;
   if (!isBitSet(PINC, BTN_DROITE))
     return DROITE;
+  return -1;
+}
+
+int lireBoutonExtra()
+{
   if (!isBitSet(PINC, BTN_B))
     return B;
   if (!isBitSet(PINC, BTN_C))
     return C;
   return -1;
 }
-
-
 
 void lireSequenceJoueur()
 {
@@ -301,6 +304,10 @@ void lireSequenceJoueur()
   }
 }
 
+void lireSequenceJoueurExtra()
+{
+  
+}
 // Fonction pour vérifier si la séquence du joueur correspond à celle de l'ordinateur.
 bool VerificationSequences()
 {
@@ -382,6 +389,8 @@ void etatGagne()
   afficheBoutons(BAS, false, true);
   afficheBoutons(GAUCHE, false, true);
   afficheBoutons(DROITE, false, true);
+  afficheBoutons(B, false, true);
+  afficheBoutons(C, false, true);
   delay(500); // Petite pause avant de commencer le prochain tour
 }
 
