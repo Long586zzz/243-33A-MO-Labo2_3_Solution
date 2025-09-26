@@ -153,6 +153,7 @@ void afficheBoutons(int bouton, bool isFull, bool skipRefresh = false)
         matrix.fillCircle(42, 16, 2, matrix.Color333(0, 0, 0));
         matrix.drawCircle(42, 16, 2, matrix.Color333(0, 7, 0));
       }
+      break;
     }
   }
 }
@@ -308,7 +309,22 @@ void lireSequenceJoueur()
 
 void lireSequenceJoueurExtra()
 {
-  
+  int index = 0;
+  while (index < jeu.longueur)
+  {
+    int bouton = lireBoutonExtra();
+    if (bouton != -1 && jeu.sequenceJoueur[index] == -1)
+    {
+      jeu.sequenceJoueur[index] = bouton;
+      // Affichage du bouton appuyé sur le moniteur série
+      Serial.println(bouton == B ? "B" : "C");
+      // Affichage du bouton appuyé sur la matrice
+      afficheBoutons(bouton, true, true);
+      delay(250);
+      afficheBoutons(bouton, false, true);
+      index++; // Passe au bouton suivant dans la séquence du joueur
+    }
+  }     
 }
 // Fonction pour vérifier si la séquence du joueur correspond à celle de l'ordinateur.
 bool VerificationSequences()
