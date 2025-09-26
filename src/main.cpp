@@ -66,12 +66,12 @@ void afficheTitre()
   matrix.setCursor(15, 0);
   matrix.setTextColor(matrix.Color333(0, 7, 0));
   matrix.print("Simon");
-  matrix.setCursor(0, 10);
+  matrix.setCursor(3, 10);
   matrix.setTextColor(matrix.Color333(7, 0, 0));
   matrix.print("Appuie sur");
-  matrix.setCursor(30, 20);
+  matrix.setCursor(20, 20);
   matrix.setTextColor(matrix.Color333(0, 0, 7));
-  matrix.print("A");
+  matrix.print("A/B/C");
 }
 
 // Fonction pour afficher l'état des boutons-poussoirs sur la matrice.
@@ -135,23 +135,23 @@ void afficheBoutons(int bouton, bool isFull, bool skipRefresh = false)
     case B:
       if (isFull)
       {
-        matrix.fillCircle(10, 16, 2, matrix.Color333(7, 0, 0));
+        matrix.fillCircle(10, 16, 2, matrix.Color333(7, 0, 7));
       }
       else
       {
         matrix.fillCircle(10, 16, 2, matrix.Color333(0, 0, 0));
-        matrix.drawCircle(10, 16, 2, matrix.Color333(7, 0, 0));
+        matrix.drawCircle(10, 16, 2, matrix.Color333(7, 0, 7));
       }
-      break;
+      break;  
     case C:
-      if (isFull)     
+      if (isFull)
       {
-        matrix.fillCircle(42, 16, 2, matrix.Color333(0, 7, 0));
+        matrix.fillCircle(5, 16, 2, matrix.Color333(7, 7, 0));
       }
       else
       {
-        matrix.fillCircle(42, 16, 2, matrix.Color333(0, 0, 0));
-        matrix.drawCircle(42, 16, 2, matrix.Color333(0, 7, 0));
+        matrix.fillCircle(5, 16, 2, matrix.Color333(0, 0, 0));
+        matrix.drawCircle(5, 16, 2, matrix.Color333(7, 7, 0));
       }
       break;
     }
@@ -165,28 +165,6 @@ void lireBoutonsDebug()
   static bool old_btn_bas = 0;    // Variable pour l'ancienne valeur du bouton bas
   static bool old_btn_gauche = 0; // Variable pour l'ancienne valeur du bouton gauche
   static bool old_btn_droite = 0; // Variable pour l'ancienne valeur du bouton droit
-  static bool old_btn_b = 0;      // Variable pour l'ancienne valeur du bouton B
-  static bool old_btn_c = 0;      // Variable pour l'ancienne valeur du bouton C
-    if (!isBitSet(PINC, BTN_B) && old_btn_b == 1)
-  {
-    afficheBoutons(B, true);
-    old_btn_b = 0;
-  }
-  else if (isBitSet(PINC, BTN_B) && old_btn_b == 0)
-  {
-    afficheBoutons(B, false);
-    old_btn_b = 1;
-  }
-    if (!isBitSet(PINC, BTN_C) && old_btn_c == 1)
-  {
-    afficheBoutons(C, true);
-    old_btn_c = 0;
-  }
-  else if (isBitSet(PINC, BTN_C) && old_btn_c == 0)
-  {
-    afficheBoutons(C, false);
-    old_btn_c = 1;
-  }
   if (!isBitSet(PINC, BTN_HAUT) && old_btn_haut == 1)
   {
     afficheBoutons(HAUT, true);
@@ -276,15 +254,6 @@ int lireBouton()
   return -1;
 }
 
-int lireBoutonExtra()
-{
-  if (!isBitSet(PINC, BTN_B))
-    return B;
-  if (!isBitSet(PINC, BTN_C))
-    return C;
-  return -1;
-}
-
 void lireSequenceJoueur()
 {
   int index = 0;
@@ -307,25 +276,7 @@ void lireSequenceJoueur()
   }
 }
 
-void lireSequenceJoueurExtra()
-{
-  int index = 0;
-  while (index < jeu.longueur)
-  {
-    int bouton = lireBoutonExtra();
-    if (bouton != -1 && jeu.sequenceJoueur[index] == -1)
-    {
-      jeu.sequenceJoueur[index] = bouton;
-      // Affichage du bouton appuyé sur le moniteur série
-      Serial.println(bouton == B ? "B" : "C");
-      // Affichage du bouton appuyé sur la matrice
-      afficheBoutons(bouton, true, true);
-      delay(250);
-      afficheBoutons(bouton, false, true);
-      index++; // Passe au bouton suivant dans la séquence du joueur
-    }
-  }     
-}
+
 // Fonction pour vérifier si la séquence du joueur correspond à celle de l'ordinateur.
 bool VerificationSequences()
 {
