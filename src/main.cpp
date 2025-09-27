@@ -40,7 +40,7 @@
 
 #define TAILLE_MAX_SEQUENCE 100
 #define LONGUEUR_INITIALE 4
-#define NOMBRE_BOUTONS 4
+#define NOMBRE_BOUTONS 6
 
 enum Etats
 {
@@ -56,6 +56,8 @@ struct SequenceJeu
   int sequenceOrdi[TAILLE_MAX_SEQUENCE];
   int sequenceJoueur[TAILLE_MAX_SEQUENCE];
   int longueur = LONGUEUR_INITIALE;
+  unsigned long vitesse = 500;
+  bool modeDifficulte = false;
 };
 
 SequenceJeu jeu;
@@ -71,7 +73,7 @@ void afficheTitre()
   matrix.print("Appuie sur");
   matrix.setCursor(20, 20);
   matrix.setTextColor(matrix.Color333(0, 0, 7));
-  matrix.print("A/B/C");
+  matrix.print("A/B");
 }
 
 // Fonction pour afficher l'état des boutons-poussoirs sur la matrice.
@@ -135,23 +137,23 @@ void afficheBoutons(int bouton, bool isFull, bool skipRefresh = false)
     case B:
       if (isFull)
       {
-        matrix.fillCircle(10, 16, 2, matrix.Color333(7, 0, 7));
+        matrix.fillCircle(40, 16, 2, matrix.Color333(7, 0, 0));
       }
       else
       {
-        matrix.fillCircle(10, 16, 2, matrix.Color333(0, 0, 0));
-        matrix.drawCircle(10, 16, 2, matrix.Color333(7, 0, 7));
+        matrix.fillCircle(40, 16, 2, matrix.Color333(0, 0, 0));
+        matrix.drawCircle(40, 16, 2, matrix.Color333(7, 0, 0));
       }
       break;  
     case C:
       if (isFull)
       {
-        matrix.fillCircle(5, 16, 2, matrix.Color333(7, 7, 0));
+        matrix.fillCircle(45, 16, 2, matrix.Color333(0, 7, 0));
       }
       else
       {
-        matrix.fillCircle(5, 16, 2, matrix.Color333(0, 0, 0));
-        matrix.drawCircle(5, 16, 2, matrix.Color333(7, 7, 0));
+        matrix.fillCircle(45, 16, 2, matrix.Color333(0, 0, 0));
+        matrix.drawCircle(45, 16, 2, matrix.Color333(0, 7, 0));
       }
       break;
     }
@@ -165,6 +167,28 @@ void lireBoutonsDebug()
   static bool old_btn_bas = 0;    // Variable pour l'ancienne valeur du bouton bas
   static bool old_btn_gauche = 0; // Variable pour l'ancienne valeur du bouton gauche
   static bool old_btn_droite = 0; // Variable pour l'ancienne valeur du bouton droit
+  static bool old_btn_b = 0;
+  static bool old_btn_c = 0; 
+  if (!isBitSet(PINC, BTN_B) && old_btn_b == 1)
+  {
+    afficheBoutons(B, true);
+    old_btn_b = 0;
+  }
+  else if (isBitSet(PINC, BTN_B) && old_btn_b == 0)
+  {
+    afficheBoutons(B, false);
+    old_btn_b = 1;
+  }
+  if (!isBitSet(PINC, BTN_C) && old_btn_c == 1)
+  {
+    afficheBoutons(C, true);
+    old_btn_c = 0;
+  }
+  else if (isBitSet(PINC, BTN_C) && old_btn_c == 0)
+  {
+    afficheBoutons(C, false);
+    old_btn_c = 1;
+  }
   if (!isBitSet(PINC, BTN_HAUT) && old_btn_haut == 1)
   {
     afficheBoutons(HAUT, true);
@@ -232,7 +256,7 @@ void afficheSequenceOrdi()
   for (int i = 0; i < jeu.longueur; i++)
   {
     afficheBoutons(jeu.sequenceOrdi[i], true, true);
-    delay(500);
+    delay(jeu.vitesse);
     afficheBoutons(jeu.sequenceOrdi[i], false, true);
     delay(250);
   }
@@ -251,6 +275,10 @@ int lireBouton()
     return GAUCHE;
   if (!isBitSet(PINC, BTN_DROITE))
     return DROITE;
+  if (!isBitSet(PINC, BTN_B))
+    return B;
+  if (!isBitSet(PINC, BTN_C))
+    return C;  
   return -1;
 }
 
@@ -314,6 +342,25 @@ void etatDebut()
     randomSeed(analogRead(A0) + analogRead(A1) + millis());
     delay(500); // Petite pause avant de commencer le jeu
   }
+  else if (isBitSet(PINC, BTN_B)==0)
+  {
+    matrix.fillScreen(matrix.Color333(0, 0, 0));
+    afficheBoutons(HAUT, false, true);
+    afficheBoutons(BAS, false, true);
+    afficheBoutons(GAUCHE, false, true);
+    afficheBoutons(DROITE, false, true);
+    afficheBoutons(B, false, true);
+    afficheBoutons(C, false, true);
+    jeu.modeDifficulte = true;
+    etatDuJeu = JEU;
+    Serial.println("Changement d'état: JEU");
+    // Génération d'une graine aléatoire basée sur le bruit électrique des broches analogiques
+    // Ici on utilise A0 et A1 pour plus de variabilité et on ajoute millis() pour éviter d'avoir la même graine à chaque redémarrage rapide
+    // On obtient ainsi une bien meilleure graine aléatoire.
+    // On le fait pour qu'une nouvelle graine soit générée à chaque fois que le jeu commence.
+    randomSeed(analogRead(A0) + analogRead(A1) + millis());
+    delay(500); // Petite pause avant de commencer le jeu
+  }
 }
 
 // Fonction pour gérer l'état JEU du jeu.
@@ -346,6 +393,11 @@ void etatGagne()
   {
     jeu.longueur = TAILLE_MAX_SEQUENCE;
   }
+
+  if (jeu.modeDifficulte)
+  {
+    jeu.vitesse = 100 ;
+  }
   matrix.fillScreen(matrix.Color333(0, 0, 7)); // Vert pour gagné
   matrix.setCursor(10, 10);
   matrix.setTextColor(matrix.Color333(0, 0, 0));
@@ -366,6 +418,7 @@ void etatGagne()
 void etatPerdu()
 {
   jeu.longueur = LONGUEUR_INITIALE;
+  jeu.vitesse = 500;
   matrix.fillScreen(matrix.Color333(7, 0, 0)); // Rouge pour perdu
   matrix.setCursor(10, 10);
   matrix.setTextColor(matrix.Color333(0, 0, 0));
