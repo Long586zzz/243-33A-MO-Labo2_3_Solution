@@ -246,7 +246,7 @@ void remplirSequenceOrdi()
 {
   for (int i = 0; i < jeu.longueur; i++)
   {
-    jeu.sequenceOrdi[i] = random(0, NOMBRE_BOUTONS); // Génère un nombre aléatoire entre 0 et 3
+    jeu.sequenceOrdi[i] = random(0, NOMBRE_BOUTONS); // Génère un nombre aléatoire entre 0 et 5
   }
 }
 
@@ -362,7 +362,6 @@ void etatDebut()
     delay(500); // Petite pause avant de commencer le jeu
   }
 }
-
 // Fonction pour gérer l'état JEU du jeu.
 void etatJeu()
 {
