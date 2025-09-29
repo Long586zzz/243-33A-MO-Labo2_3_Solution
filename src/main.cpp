@@ -40,7 +40,7 @@
 
 #define TAILLE_MAX_SEQUENCE 100
 #define LONGUEUR_INITIALE 4
-#define NOMBRE_BOUTONS 6
+#define NOMBRE_BOUTONS 5
 
 enum Etats
 {
@@ -58,6 +58,7 @@ struct SequenceJeu
   int longueur = LONGUEUR_INITIALE;
   unsigned long vitesse = 500;
   bool modeDifficulte = false;
+  bool modeConfus = false;
 };
 
 SequenceJeu jeu;
@@ -73,7 +74,7 @@ void afficheTitre()
   matrix.print("Appuie sur");
   matrix.setCursor(20, 20);
   matrix.setTextColor(matrix.Color333(0, 0, 7));
-  matrix.print("A/B");
+  matrix.print("A/B/C");
 }
 
 // Fonction pour afficher l'état des boutons-poussoirs sur la matrice.
@@ -352,6 +353,27 @@ void etatDebut()
     afficheBoutons(B, false, true);
     afficheBoutons(C, false, true);
     jeu.modeDifficulte = true;
+    jeu.modeConfus = false;
+    etatDuJeu = JEU;
+    Serial.println("Changement d'état: JEU");
+    // Génération d'une graine aléatoire basée sur le bruit électrique des broches analogiques
+    // Ici on utilise A0 et A1 pour plus de variabilité et on ajoute millis() pour éviter d'avoir la même graine à chaque redémarrage rapide
+    // On obtient ainsi une bien meilleure graine aléatoire.
+    // On le fait pour qu'une nouvelle graine soit générée à chaque fois que le jeu commence.
+    randomSeed(analogRead(A0) + analogRead(A1) + millis());
+    delay(500); // Petite pause avant de commencer le jeu
+  }
+  else if (isBitSet(PINC, BTN_C)==0)
+  {
+    matrix.fillScreen(matrix.Color333(0, 0, 0));
+    afficheBoutons(HAUT, false, true);
+    afficheBoutons(BAS, false, true);
+    afficheBoutons(GAUCHE, false, true);
+    afficheBoutons(DROITE, false, true);
+    afficheBoutons(B, false, true);
+    afficheBoutons(C, false, true);
+    jeu.modeDifficulte = false;
+    jeu.modeConfus = true;
     etatDuJeu = JEU;
     Serial.println("Changement d'état: JEU");
     // Génération d'une graine aléatoire basée sur le bruit électrique des broches analogiques
@@ -397,6 +419,11 @@ void etatGagne()
   {
     jeu.vitesse = 100 ;
   }
+  if (jeu.modeConfus)
+  {
+
+  }
+
   matrix.fillScreen(matrix.Color333(0, 0, 7)); // Vert pour gagné
   matrix.setCursor(10, 10);
   matrix.setTextColor(matrix.Color333(0, 0, 0));
